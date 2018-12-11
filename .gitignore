@@ -1,0 +1,3 @@
+*.ofx
+*.csv
+.ipynb_checkpoints
