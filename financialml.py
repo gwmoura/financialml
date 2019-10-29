@@ -34,13 +34,16 @@ def parse_file(file, transactions_data, words_df):
         for transaction in ofx.account.statement.transactions:
             if transaction.amount < 0:
                 label = get_label(transaction.memo, words_df)
+                day = transaction.date.strftime("%Y-%m-%d")
+                month = transaction.date.strftime("%Y-%m")
+                year = transaction.date.year
                 transactions_data.append(
                     [
                         transaction.memo,
                         transaction.amount,
-                        transaction.date.day,
-                        transaction.date.month,
-                        transaction.date.year,
+                        day,
+                        month,
+                        year,
                         label
                     ]
                 )
@@ -65,9 +68,9 @@ def plot_pie(title, plt, items, total, the_grid, s, e):
 
 
 if __name__ == '__main__':
-    paths = ['./extratos/bb/', './extratos/bradesco/']
-    words_df = pd.read_csv('dataset/words.csv', delimiter=";", names=['word', 'label'])
-    print(words_df)
+    paths = ['./extratos/bb/', './extratos/bradesco/', './extratos/inter/']
+    words_df = pd.read_csv('datasets/words.csv', delimiter=";", names=['word', 'label'])
+    # print(words_df)
     transactions_data = []
 
     total = 0.0
@@ -78,8 +81,9 @@ if __name__ == '__main__':
             parse_file(file, transactions_data, words_df)
 
     df = pd.DataFrame(transactions_data, columns = ['memo', 'amount', 'day', 'month', 'year', 'label'])
+    df.to_csv('datasets/extratos.csv')
     df2 = df[df.label == UNCATEGORIZED]
-    print(df2)
+    print(df2.groupby(['memo'])['memo'].count())
     despesas_by_label = {}
     total = {}
     # df.loc[df['label']!='cartao']
@@ -104,19 +108,19 @@ if __name__ == '__main__':
     # print(despesas_by_label.items())
 
     grouping_df = df.groupby(['year', 'month', 'label'])['amount'].sum()
-    grouping_df.to_csv('dataset/totais.csv')
+    grouping_df.to_csv('datasets/totais.csv')
     print(grouping_df)
 
-    the_grid = GridSpec(3, 4)
-    s = 0
-    e = 0
-    for despesas in despesas_by_label.items():
-        m = despesas[0]
-        if e > 3:
-            s += 1
-            e = 0
-        print(s,e,m)
-        plot_pie(str(m), plt, despesas_by_label[m].items(), total[m], the_grid, s, e)
-        e += 1
-    plt.show()
+    # the_grid = GridSpec(3, 4)
+    # s = 0
+    # e = 0
+    # for despesas in despesas_by_label.items():
+    #     m = despesas[0]
+    #     if e > 3:
+    #         s += 1
+    #         e = 0
+    #     print(s,e,m)
+    #     plot_pie(str(m), plt, despesas_by_label[m].items(), total[m], the_grid, s, e)
+    #     e += 1
+    # plt.show()
 
